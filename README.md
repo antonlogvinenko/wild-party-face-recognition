@@ -2,6 +2,12 @@
 
 A Clojure library designed to ... well, that part is up to you.
 
+* Donwloading images from http://rest.vl.ru/eventreports [done]
+* Photoreport face detection [done]
+  * Cascade [done]
+  * Eyes detecion
+* Face recognition
+
 ## Usage
 
 FIXME

@@ -9,6 +9,9 @@
    org.opencv.highgui.Highgui
    org.opencv.objdetect.CascadeClassifier))
 
+;;Basic face detection - http://nils-blum-oeste.net/image-analysis-with-clojure-up-and-running-with-opencv/
+;;+ eyes http://docs.opencv.org/doc/tutorials/objdetect/cascade_classifier/cascade_classifier.html
+
 (defn create-classifier []
   (-> "lbpcascade_frontalface.xml" clojure.java.io/resource .getPath CascadeClassifier.))
 
