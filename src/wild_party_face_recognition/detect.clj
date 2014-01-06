@@ -9,18 +9,15 @@
    org.opencv.highgui.Highgui
    org.opencv.objdetect.CascadeClassifier))
 
-(def face-detections (atom []))
-
 (defn create-classifier []
   (-> "lbpcascade_frontalface.xml" clojure.java.io/resource .getPath CascadeClassifier.))
 
-(defn load-image [path]
-  (Highgui/imread path))
-
 (defn detect-faces! [classifier image]
-  (.detectMultiScale classifier image @face-detections))
+  (let [face-detections (atom (MatOfRect.))]
+    (.detectMultiScale classifier image @face-detections)
+    face-detections))
 
-(defn draw-bounding-boxes! [image to-file]
+(defn draw-bounding-boxes [image to-file face-detections]
   (doall (map (fn [rect]
                 (Core/rectangle image
                                 (Point. (.x rect) (.y rect))
@@ -30,16 +27,16 @@
               (.toArray @face-detections)))
   (Highgui/imwrite to-file image))
 
-(defn process-and-save-image! [in out]
-  (let [image (load-image in)]
-    (detect-faces! (create-classifier) image)
-    (draw-bounding-boxes! image out)))
+(defn process-and-save-image [in out]
+  (let [image (Highgui/imread in)]
+    (->> image
+         (detect-faces! (create-classifier))
+         (draw-bounding-boxes image out))))
+
+(defn main [fin fout]
+  (clojure.lang.RT/loadLibrary Core/NATIVE_LIBRARY_NAME)
+  (process-and-save-image fin fout))
 
 (defn find [name]
   (let [path "/Users/anton/Desktop/"]
     (main (str path "dest/" name ".jpg") (str path "out/" name ".png"))))
-
-(defn main [fin fout]
-  (clojure.lang.RT/loadLibrary Core/NATIVE_LIBRARY_NAME)
-  (reset! face-detections (MatOfRect.))
-  (process-and-save-image! fin fout))
