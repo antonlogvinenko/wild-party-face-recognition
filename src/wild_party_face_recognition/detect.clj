@@ -12,33 +12,50 @@
 ;;Basic face detection - http://nils-blum-oeste.net/image-analysis-with-clojure-up-and-running-with-opencv/
 ;;+ eyes http://docs.opencv.org/doc/tutorials/objdetect/cascade_classifier/cascade_classifier.html
 
-(defn create-classifier []
-  (-> "lbpcascade_frontalface.xml" clojure.java.io/resource .getPath CascadeClassifier.))
+(clojure.lang.RT/loadLibrary Core/NATIVE_LIBRARY_NAME)
 
-(defn detect-faces [classifier image]
-  (let [face-detections (atom (MatOfRect.))]
-    (.detectMultiScale classifier image @face-detections)
+(defn create-resource [name]
+  (do  (-> name clojure.java.io/resource .getPath CascadeClassifier.)))
+
+(def faces-classifier (create-resource "lbpcascade_frontalface.xml"))
+(def eyes-classifier (create-resource "haarcascade_eye.xml"))
+
+(defn detect-faces [image]
+  (let [face-detections (MatOfRect.)]
+    (.detectMultiScale faces-classifier image face-detections)
     face-detections))
 
+(defn make-rect [image rect x y color]
+  (Core/rectangle image
+                  (Point. (+ x (.x rect)) (+ y (.y rect)))
+                  (Point. (+ x (.x rect) (.width rect))
+                          (+ y (.y rect) (.height rect)))
+                  (Scalar. 0 color 0)))
+
+(defn cake [image [f-rect e-rect]]
+  (make-rect image f-rect 0 0 250)
+  (doall (for [eye (-> e-rect .toArray seq)]
+           (make-rect image eye (.x f-rect) (.y f-rect) 100))))
+
 (defn draw-bounding-boxes [image to-file face-detections]
-  (doall (map (fn [rect]
-                (Core/rectangle image
-                                (Point. (.x rect) (.y rect))
-                                (Point. (+ (.x rect) (.width rect))
-                                        (+ (.y rect) (.height rect)))
-                                (Scalar. 0 255 0)))
-              (.toArray @face-detections)))
+  (doall (map (partial cake image) face-detections))
   (Highgui/imwrite to-file image))
 
+(defn detect-eyes [image rect]
+  (let [eyes-detections (MatOfRect.)
+        face-img (.submat image rect)]
+    (.detectMultiScale eyes-classifier face-img eyes-detections)
+    [rect eyes-detections]))
+
 (defn process-and-save-image [in out]
-  (let [image (Highgui/imread in)
-        classifier (create-classifier)]
+  (let [image (Highgui/imread in)]
     (->> image
-         (detect-faces classifier)
+         detect-faces
+         .toArray
+         (map (partial detect-eyes image))
          (draw-bounding-boxes image out))))
 
 (defn main [fin fout]
-  (clojure.lang.RT/loadLibrary Core/NATIVE_LIBRARY_NAME)
   (process-and-save-image fin fout))
 
 (defn find [name]

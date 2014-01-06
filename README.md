@@ -6,4 +6,4 @@ Face detection and recognition for http://rest.vl.ru/eventreports
 * Photoreport face detection [done]
   * Cascade [done]
   * Eyes detecion
-* Face recognition
+* Face recognitione
