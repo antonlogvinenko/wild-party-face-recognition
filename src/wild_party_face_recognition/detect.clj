@@ -12,7 +12,7 @@
 (defn create-classifier []
   (-> "lbpcascade_frontalface.xml" clojure.java.io/resource .getPath CascadeClassifier.))
 
-(defn detect-faces! [classifier image]
+(defn detect-faces [classifier image]
   (let [face-detections (atom (MatOfRect.))]
     (.detectMultiScale classifier image @face-detections)
     face-detections))
@@ -28,9 +28,10 @@
   (Highgui/imwrite to-file image))
 
 (defn process-and-save-image [in out]
-  (let [image (Highgui/imread in)]
+  (let [image (Highgui/imread in)
+        classifier (create-classifier)]
     (->> image
-         (detect-faces! (create-classifier))
+         (detect-faces classifier)
          (draw-bounding-boxes image out))))
 
 (defn main [fin fout]
