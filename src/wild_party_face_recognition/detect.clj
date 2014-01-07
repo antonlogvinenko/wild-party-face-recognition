@@ -17,8 +17,13 @@
 (defn create-resource [name]
   (do  (-> name clojure.java.io/resource .getPath CascadeClassifier.)))
 
-(def faces-classifier (create-resource "lbpcascade_frontalface.xml"))
-(def eyes-classifier (create-resource "haarcascade_eye.xml"))
+;lbpcascade_frontalface.xml
+;haarcascade_frontalface_alt2.xml
+;haarcascade_frontalface_default.xml
+(def faces-classifier (create-resource "haarcascade_frontalface_default.xml"))
+
+;haarcascade_eye.xml
+(def eyes-classifier (create-resource  "haarcascade_eye.xml"))
 
 (defn detect-faces [image]
   (let [face-detections (MatOfRect.)]

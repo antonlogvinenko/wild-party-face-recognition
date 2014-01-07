@@ -8,5 +8,6 @@ Face detection and recognition for http://rest.vl.ru/eventreports
   * Eyes detecion [done]
   * Try different face detections xml classifiers (+ google?)
   * Same for eyes detections
-  * Filter recognized faces based on amount of eyes? =)
-* Face recognitione
+  * Filter recognized faces based on amount of eyes?
+* Face recognition - learning
+* Face detection with learning
